@@ -315,7 +315,7 @@ public:
         // engage lamp
         const bool on = engage.getToggleState();
         g.setColour (on ? Colour (0xfffa4230) : Colour (0xff4a2b26));
-        g.fillEllipse (engage.getRight() + 10.0f, engage.getCentreY() - 4.0f, 8.0f, 8.0f);
+        g.fillEllipse ((float) engage.getRight() + 10.0f, (float) engage.getBounds().getCentreY() - 4.0f, 8.0f, 8.0f);
         g.setColour (Colour (0xff34180e));
         g.setFont (Font (9.5f, Font::bold));
         g.drawText ("ENGAGE", engage.getBounds().translated (0, engage.getHeight() + 1).withHeight (13),

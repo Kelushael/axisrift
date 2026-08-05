@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Configure
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
       - name: Build AU + VST3
         run: cmake --build build --config Release --target StubbsCue_AU StubbsCue_VST3 -j3
       - name: Show tree on failure
@@ -18,15 +18,15 @@ jobs:
       - name: Package
         run: |
           cd "build/StubbsCue_artefacts/Release"
-          zip -ry StubbsCue-macOS.zip "AU/Stubbs Cue.component" "VST3/Stubbs Cue.vst3"
-          pkgbuild --component "AU/Stubbs Cue.component" \
+          zip -ry StubbsCue-macOS.zip AU/StubbsCue.component VST3/StubbsCue.vst3
+          pkgbuild --component AU/StubbsCue.component \
                    --install-location /Library/Audio/Plug-Ins/Components \
                    --identifier com.axisrift.stubbscue --version 1.0.0 StubbsCue-AU.pkg
       - name: Verify it will actually load
         continue-on-error: true
         run: |
           cd "build/StubbsCue_artefacts/Release"
-          B="AU/Stubbs Cue.component/Contents/MacOS/Stubbs Cue"
+          B=AU/StubbsCue.component/Contents/MacOS/StubbsCue
           file "$B" || true; lipo -archs "$B" || true
           otool -l "$B" | grep -A3 LC_BUILD_VERSION || true
       - uses: actions/upload-artifact@v4

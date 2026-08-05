@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 
-# Match the axistape target: Intel + High Sierra so it loads on old Macs too.
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "" FORCE)
-set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "" FORCE)
+# Modern Macs: universal arm64 + Intel so it loads in Logic on Apple Silicon.
+set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "" FORCE)
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -21,7 +21,7 @@ juce_add_plugin(StubbsCue
   PLUGIN_MANUFACTURER_CODE Axrf
   PLUGIN_CODE Stbq
   FORMATS AU VST3 Standalone
-  PRODUCT_NAME "Stubbs Cue"
+  PRODUCT_NAME "StubbsCue"
   IS_SYNTH FALSE
   NEEDS_MIDI_INPUT FALSE
   COPY_PLUGIN_AFTER_BUILD FALSE)

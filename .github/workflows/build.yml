@@ -49,27 +49,43 @@ jobs:
       - name: Package Win
         shell: bash
         run: |
+          set -e
+          # Windows runners don't ship Info-ZIP — use PowerShell Compress-Archive
           mkdir -p dist/win
-          for P in StubbsCue AutoQuacker; do
-            ART="build/${P}_artefacts/Release"
-            # MSVC layout varies
-            V=$(find build -type d -name "${P}.vst3" | head -1)
-            if [ -z "$V" ]; then V=$(find build -type d -name "*.vst3" | head -1); fi
-            if [ -n "$V" ]; then
-              (cd "$(dirname "$V")" && zip -ry "$GITHUB_WORKSPACE/dist/win/${P}-Windows-VST3.zip" "$(basename "$V")")
+          package_vst3 () {
+            local name="$1"
+            local dir parent base out win_parent win_out
+            dir=$(find build -type d -name "${name}.vst3" | head -1)
+            if [ -z "$dir" ]; then
+              echo "ERROR: no ${name}.vst3 under build/" >&2
+              find build -name '*.vst3' -type d | head -20
+              return 1
             fi
-          done
-          # fallback zip all vst3
-          find build -name "*.vst3" -type d | while read d; do
-            base=$(basename "$d" .vst3)
-            zip -ry "dist/win/${base}-Windows-VST3.zip" "$d" || true
-          done
-          ls -la dist/win || ls -laR build | head -80
+            parent=$(dirname "$dir")
+            base=$(basename "$dir")
+            out="$GITHUB_WORKSPACE/dist/win/${name}-Windows-VST3.zip"
+            # Convert to Windows paths for PowerShell
+            win_parent=$(cygpath -w "$parent" 2>/dev/null || echo "$parent" | sed 's|^/d|D:|;s|/|\\|g')
+            win_out=$(cygpath -w "$out" 2>/dev/null || echo "$out" | sed 's|^/d|D:|;s|/|\\|g')
+            powershell.exe -NoProfile -Command "
+              \$src = Join-Path '${win_parent}' '${base}'
+              \$dst = '${win_out}'
+              if (Test-Path \$dst) { Remove-Item -Force \$dst }
+              Compress-Archive -Path \$src -DestinationPath \$dst -Force
+              if (-not (Test-Path \$dst)) { throw 'zip missing' }
+              Write-Host \"wrote \$dst size=\$((Get-Item \$dst).Length)\"
+            "
+          }
+          package_vst3 StubbsCue
+          package_vst3 AutoQuacker
+          ls -la dist/win
+          test -s dist/win/StubbsCue-Windows-VST3.zip
+          test -s dist/win/AutoQuacker-Windows-VST3.zip
       - uses: actions/upload-artifact@v4
         with:
           name: axisrift-Windows
           path: dist/win/*
-          if-no-files-found: warn
+          if-no-files-found: error
 
   linux:
     runs-on: ubuntu-22.04

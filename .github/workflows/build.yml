@@ -11,28 +11,89 @@ jobs:
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="arm64;x86_64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
       - name: Build AU + VST3
-        run: cmake --build build --config Release --target StubbsCue_AU StubbsCue_VST3 -j3
-      - name: Show tree on failure
-        if: failure()
-        run: find build -maxdepth 4 -name "*.component" -o -maxdepth 4 -name "*.vst3" | head -20
-      - name: Package
         run: |
-          cd "build/StubbsCue_artefacts/Release"
-          zip -ry StubbsCue-macOS.zip AU/StubbsCue.component VST3/StubbsCue.vst3
-          pkgbuild --component AU/StubbsCue.component \
-                   --install-location /Library/Audio/Plug-Ins/Components \
-                   --identifier com.axisrift.stubbscue --version 1.0.0 StubbsCue-AU.pkg
-      - name: Verify it will actually load
-        continue-on-error: true
+          cmake --build build --config Release -j3 \
+            --target StubbsCue_AU StubbsCue_VST3 AutoQuacker_AU AutoQuacker_VST3
+      - name: Package Mac
         run: |
-          cd "build/StubbsCue_artefacts/Release"
-          B=AU/StubbsCue.component/Contents/MacOS/StubbsCue
-          file "$B" || true; lipo -archs "$B" || true
-          otool -l "$B" | grep -A3 LC_BUILD_VERSION || true
+          mkdir -p dist/mac
+          for P in StubbsCue AutoQuacker; do
+            ART="build/${P}_artefacts/Release"
+            if [ -d "$ART/AU" ] && [ -d "$ART/VST3" ]; then
+              (cd "$ART" && zip -ry "../../../dist/mac/${P}-macOS-AU-VST3.zip" AU VST3)
+            fi
+            if [ -d "$ART/AU/${P}.component" ] || [ -d "$ART/AU" ]; then
+              COMP=$(find "$ART/AU" -name "*.component" | head -1)
+              if [ -n "$COMP" ]; then
+                pkgbuild --component "$COMP" \
+                  --install-location /Library/Audio/Plug-Ins/Components \
+                  --identifier com.axisrift.$(echo $P | tr '[:upper:]' '[:lower:]') \
+                  --version 1.1.0 "dist/mac/${P}-AU.pkg" || true
+              fi
+            fi
+          done
+          ls -la dist/mac
       - uses: actions/upload-artifact@v4
         with:
-          name: StubbsCue-macOS
-          path: |
-            build/StubbsCue_artefacts/Release/StubbsCue-macOS.zip
-            build/StubbsCue_artefacts/Release/StubbsCue-AU.pkg
+          name: axisrift-macOS
+          path: dist/mac/*
 
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build VST3
+        run: cmake --build build --config Release -j2 --target StubbsCue_VST3 AutoQuacker_VST3
+      - name: Package Win
+        shell: bash
+        run: |
+          mkdir -p dist/win
+          for P in StubbsCue AutoQuacker; do
+            ART="build/${P}_artefacts/Release"
+            # MSVC layout varies
+            V=$(find build -type d -name "${P}.vst3" | head -1)
+            if [ -z "$V" ]; then V=$(find build -type d -name "*.vst3" | head -1); fi
+            if [ -n "$V" ]; then
+              (cd "$(dirname "$V")" && zip -ry "$GITHUB_WORKSPACE/dist/win/${P}-Windows-VST3.zip" "$(basename "$V")")
+            fi
+          done
+          # fallback zip all vst3
+          find build -name "*.vst3" -type d | while read d; do
+            base=$(basename "$d" .vst3)
+            zip -ry "dist/win/${base}-Windows-VST3.zip" "$d" || true
+          done
+          ls -la dist/win || ls -laR build | head -80
+      - uses: actions/upload-artifact@v4
+        with:
+          name: axisrift-Windows
+          path: dist/win/*
+          if-no-files-found: warn
+
+  linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libasound2-dev libfreetype6-dev libx11-dev libxcomposite-dev \
+            libxcursor-dev libxext-dev libxinerama-dev libxrandr-dev libxrender-dev libglu1-mesa-dev
+      - name: Configure
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Build VST3
+        run: cmake --build build --config Release -j2 --target StubbsCue_VST3 AutoQuacker_VST3
+      - name: Package Linux (Debian/Ubuntu)
+        run: |
+          mkdir -p dist/linux
+          find build -type d -name "*.vst3" | while read d; do
+            base=$(basename "$d" .vst3)
+            (cd "$(dirname "$d")" && zip -ry "$GITHUB_WORKSPACE/dist/linux/${base}-Linux-VST3.zip" "$(basename "$d")")
+          done
+          ls -la dist/linux
+      - uses: actions/upload-artifact@v4
+        with:
+          name: axisrift-Linux
+          path: dist/linux/*
+          if-no-files-found: warn

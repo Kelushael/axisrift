@@ -13,11 +13,11 @@ jobs:
       - name: Build AU + VST3
         run: |
           cmake --build build --config Release -j3 \
-            --target StubbsCue_AU StubbsCue_VST3 AutoQuacker_AU AutoQuacker_VST3
+            --target StubbsCue_AU StubbsCue_VST3 AutoQuacker_AU AutoQuacker_VST3 PearlVox_AU PearlVox_VST3
       - name: Package Mac
         run: |
           mkdir -p dist/mac
-          for P in StubbsCue AutoQuacker; do
+          for P in StubbsCue AutoQuacker PearlVox; do
             ART="build/${P}_artefacts/Release"
             if [ -d "$ART/AU" ] && [ -d "$ART/VST3" ]; then
               (cd "$ART" && zip -ry "../../../dist/mac/${P}-macOS-AU-VST3.zip" AU VST3)
@@ -45,7 +45,7 @@ jobs:
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
       - name: Build VST3
-        run: cmake --build build --config Release -j2 --target StubbsCue_VST3 AutoQuacker_VST3
+        run: cmake --build build --config Release -j2 --target StubbsCue_VST3 AutoQuacker_VST3 PearlVox_VST3
       - name: Package Win
         shell: bash
         run: |
@@ -78,9 +78,11 @@ jobs:
           }
           package_vst3 StubbsCue
           package_vst3 AutoQuacker
+          package_vst3 PearlVox
           ls -la dist/win
           test -s dist/win/StubbsCue-Windows-VST3.zip
           test -s dist/win/AutoQuacker-Windows-VST3.zip
+          test -s dist/win/PearlVox-Windows-VST3.zip
       - uses: actions/upload-artifact@v4
         with:
           name: axisrift-Windows
@@ -99,7 +101,7 @@ jobs:
       - name: Configure
         run: cmake -B build -DCMAKE_BUILD_TYPE=Release
       - name: Build VST3
-        run: cmake --build build --config Release -j2 --target StubbsCue_VST3 AutoQuacker_VST3
+        run: cmake --build build --config Release -j2 --target StubbsCue_VST3 AutoQuacker_VST3 PearlVox_VST3
       - name: Package Linux (Debian/Ubuntu)
         run: |
           mkdir -p dist/linux

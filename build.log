@@ -1,0 +1,64 @@
+-- The C compiler identification is GNU 14.2.0
+-- The CXX compiler identification is GNU 14.2.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.1")
+-- Checking for module 'alsa'
+--   Found alsa, version 1.2.14
+-- Checking for module 'freetype2'
+--   Found freetype2, version 26.2.20
+-- Checking for module 'gl'
+--   Found gl, version 1.2
+-- Checking for module 'libcurl'
+--   Found libcurl, version 8.14.1
+-- Checking for modules 'webkit2gtk-4.0;gtk+-x11-3.0'
+--   Package 'webkit2gtk-4.0', required by 'virtual:world', not found
+-- Configuring juceaide
+-- Building juceaide
+-- Exporting juceaide
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE
+-- Configuring done (264.9s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/marcus/axisrift-plugins/build
+[  3%] Building CXX object CMakeFiles/juce_vst3_helper.dir/_deps/juce-src/modules/juce_audio_plugin_client/VST3/juce_VST3ManifestHelper.cpp.o
+[  7%] Building CXX object CMakeFiles/PearlVox.dir/_deps/juce-src/modules/juce_audio_processors/juce_audio_processors_ara.cpp.o
+[ 11%] Building CXX object CMakeFiles/PearlVox.dir/src/PearlVox.cpp.o
+[ 14%] Building CXX object CMakeFiles/PearlVox.dir/_deps/juce-src/modules/juce_audio_processors/juce_audio_processors.cpp.o
+[ 18%] Building CXX object CMakeFiles/PearlVox.dir/_deps/juce-src/modules/juce_audio_processors/juce_audio_processors_lv2_libs.cpp.o
+[ 22%] Building CXX object CMakeFiles/PearlVox.dir/_deps/juce-src/modules/juce_gui_extra/juce_gui_extra.cpp.o
+In file included from /home/marcus/axisrift-plugins/build/_deps/juce-src/modules/juce_audio_processors/juce_audio_processors.h:144,
+                 from /home/marcus/axisrift-plugins/src/PearlVox.cpp:7:
+/home/marcus/axisrift-plugins/build/_deps/juce-src/modules/juce_audio_processors/processors/juce_AudioProcessor.h:280:18: warning: ‘virtual void juce::AudioProcessor::processBlock(juce::AudioBuffer<double>&, juce::MidiBuffer&)’ was hidden [-Woverloaded-virtual=]
+  280 |     virtual void processBlock (AudioBuffer<double>& buffer,
+      |                  ^~~~~~~~~~~~
+/home/marcus/axisrift-plugins/src/PearlVox.cpp:100:10: note:   by ‘virtual void PearlVoxProcessor::processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&)’
+  100 |     void processBlock (AudioBuffer<float>& buffer, MidiBuffer&) override
+      |          ^~~~~~~~~~~~
+/home/marcus/axisrift-plugins/src/PearlVox.cpp: In member function ‘virtual void PearlVoxProcessor::processBlock(juce::AudioBuffer<float>&, juce::MidiBuffer&)’:
+/home/marcus/axisrift-plugins/src/PearlVox.cpp:167:39: error: ‘using PearlVoxProcessor::Filter = struct juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float> >’ {aka ‘struct juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float> >’} has no member named ‘processSample’
+  167 |                     float s = deEssHp.processSample (c == 0 ? 0 : 1, x);
+      |                                       ^~~~~~~~~~~~~
+/home/marcus/axisrift-plugins/src/PearlVox.cpp:180:30: error: ‘using PearlVoxProcessor::Filter = struct juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float> >’ {aka ‘struct juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float> >’} has no member named ‘processSample’
+  180 |                 x = presBell.processSample (c == 0 ? 0 : 1, x);
+      |                              ^~~~~~~~~~~~~
+/home/marcus/axisrift-plugins/src/PearlVox.cpp:181:30: error: ‘using PearlVoxProcessor::Filter = struct juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float> >’ {aka ‘struct juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>, juce::dsp::IIR::Coefficients<float> >’} has no member named ‘processSample’
+  181 |                 x = airShelf.processSample (c == 0 ? 0 : 1, x);
+      |                              ^~~~~~~~~~~~~
+gmake[3]: *** [CMakeFiles/PearlVox.dir/build.make:79: CMakeFiles/PearlVox.dir/src/PearlVox.cpp.o] Error 1
+gmake[3]: *** Waiting for unfinished jobs....
+[ 25%] Linking CXX executable juce_vst3_helper
+[ 25%] Built target juce_vst3_helper
+gmake[2]: *** [CMakeFiles/Makefile2:494: CMakeFiles/PearlVox.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:600: CMakeFiles/PearlVox_VST3.dir/rule] Error 2
+gmake: *** [Makefile:326: PearlVox_VST3] Error 2
+BUILD_FAIL

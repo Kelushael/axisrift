@@ -45,3 +45,5 @@ endfunction()
 
 axisrift_plugin(StubbsCue Stbq "StubbsCue" src/StubbsCue.cpp)
 axisrift_plugin(AutoQuacker Atqk "AutoQuacker" src/AutoQuacker.cpp)
+
+axisrift_plugin(PearlVox Prlv "PearlVox" src/PearlVox.cpp)

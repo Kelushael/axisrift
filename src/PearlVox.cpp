@@ -213,10 +213,50 @@ public:
     bool acceptsMidi() const override { return false; }
     bool producesMidi() const override { return false; }
     double getTailLengthSeconds() const override { return 2.0; }
-    int getNumPrograms() override { return 1; }
-    int getCurrentProgram() override { return 0; }
-    void setCurrentProgram (int) override {}
-    const String getProgramName (int) override { return "Pearl"; }
+    //==========================================================================
+    // Factory programs — values measured out of the REAPER chains themselves
+    // (read back via TrackFX_GetParam, 2026-08-20). Not estimates.
+    struct Prog { const char* name; float hpf, gate, comp, presence, air, deess, verb, delaymix, delaytime, delayfb; };
+    static constexpr int kNumProgs = 4;
+    static const Prog* progs()
+    {
+        static const Prog p[kNumProgs] = {
+            { "PEARL VOX", 97.0f, 0.0f, 0.28f, 5.0f, 0.2f, 0.882f, 0.049f, 0.058f, 250.0f, 0.412f },
+            { "Future Vocal HARD", 100.0f, 0.0f, 0.52f, 0.0f, 0.0f, 0.0f, 0.452f, 0.55f, 600.0f, 0.351f },
+            { "VOX TRACKING", 100.0f, 0.36f, 0.38f, 1.5f, 2.0f, 0.468f, 0.112f, 0.079f, 320.0f, 0.2f },
+            { "VOX PRINT", 100.0f, 0.36f, 0.38f, 1.5f, 2.0f, 0.468f, 0.0f, 0.0f, 320.0f, 0.3f },
+        };
+        return p;
+    }
+
+    void applyProgram (int i)
+    {
+        i = jlimit (0, kNumProgs - 1, i);
+        const auto& g = progs()[i];
+        auto set = [this] (const char* id, float v)
+        {
+            if (auto* pr = apvts.getParameter (id))
+                pr->setValueNotifyingHost (pr->convertTo0to1 (v));
+        };
+        set ("hpf", g.hpf);
+        set ("gate", g.gate);
+        set ("comp", g.comp);
+        set ("presence", g.presence);
+        set ("air", g.air);
+        set ("deess", g.deess);
+        set ("verb", g.verb);
+        set ("delaymix", g.delaymix);
+        set ("delaytime", g.delaytime);
+        set ("delayfb", g.delayfb);
+        set ("output", 0.0f);
+        currentProgram = i;
+    }
+
+    int getNumPrograms() override { return kNumProgs; }
+    int getCurrentProgram() override { return currentProgram; }
+    void setCurrentProgram (int i) override { applyProgram (i); }
+    const String getProgramName (int i) override
+    { return progs()[jlimit (0, kNumProgs - 1, i)].name; }
     void changeProgramName (int, const String&) override {}
     void getStateInformation (MemoryBlock& d) override
     { if (auto s = apvts.copyState().createXml()) copyXmlToBinary (*s, d); }
@@ -233,6 +273,7 @@ private:
     int delayLen = 1, delayWrite = 0;
     double sampleRate = 44100.0;
     float gateEnv = 1.0f, compEnv = 0.0f, deEnv = 0.0f;
+    int currentProgram = 0;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PearlVoxProcessor)
 };

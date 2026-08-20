@@ -217,12 +217,14 @@ public:
     // Factory programs — values measured out of the REAPER chains themselves
     // (read back via TrackFX_GetParam, 2026-08-20). Not estimates.
     struct Prog { const char* name; float hpf, gate, comp, presence, air, deess, verb, delaymix, delaytime, delayfb; };
-    static constexpr int kNumProgs = 4;
+    static constexpr int kNumProgs = 6;
     static const Prog* progs()
     {
         static const Prog p[kNumProgs] = {
             { "PEARL VOX", 97.0f, 0.0f, 0.28f, 5.0f, 0.2f, 0.882f, 0.049f, 0.058f, 250.0f, 0.412f },
             { "Future Vocal HARD", 100.0f, 0.0f, 0.52f, 0.0f, 0.0f, 0.0f, 0.452f, 0.55f, 600.0f, 0.351f },
+            { "VOX SHIP", 90.0f, 0.36f, 0.36f, 2.0f, 2.0f, 0.722f, 0.0f, 0.0f, 320.0f, 0.3f },
+            { "VOX Crisp Auto", 95.0f, 0.3f, 0.407f, 3.5f, 3.0f, 0.533f, 0.0f, 0.0f, 320.0f, 0.3f },
             { "VOX TRACKING", 100.0f, 0.36f, 0.38f, 1.5f, 2.0f, 0.468f, 0.112f, 0.079f, 320.0f, 0.2f },
             { "VOX PRINT", 100.0f, 0.36f, 0.38f, 1.5f, 2.0f, 0.468f, 0.0f, 0.0f, 320.0f, 0.3f },
         };
